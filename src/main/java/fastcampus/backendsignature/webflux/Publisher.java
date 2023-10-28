@@ -5,12 +5,17 @@ import reactor.core.publisher.Mono;
 
 public class Publisher {
     public Flux<Integer> startFlux() {
-        return Flux.range(1, 10)
+        return Flux.range(1, 5)
                 .log();
     }
 
     public Mono<Integer> startMono() {
         return Mono.just(1)
+                .log();
+    }
+
+    public Mono<?> startMono2() {
+        return Mono.error(new Exception("error!"))
                 .log();
     }
 }

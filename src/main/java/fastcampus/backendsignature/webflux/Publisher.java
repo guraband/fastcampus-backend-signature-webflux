@@ -14,6 +14,10 @@ public class Publisher {
                 .log();
     }
 
+    public Mono<?> startEmptyMono() {
+        return Mono.empty().log();
+    }
+
     public Mono<?> startMono2() {
         return Mono.error(new Exception("error!"))
                 .log();

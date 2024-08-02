@@ -30,6 +30,14 @@ public class Operator2 {
                 .log();
     }
 
+    public Flux<Integer> defaultIfEmpty2() {
+        return Flux.range(1, 5)
+                .flatMap(i -> Flux.range(i, 5)
+                        .filter(j -> j > 6)
+                        .defaultIfEmpty(99))
+                .log();
+    }
+
     // switchIfEmpty
     public Mono<Integer> switchIfEmpty() {
         return Mono.just(100)

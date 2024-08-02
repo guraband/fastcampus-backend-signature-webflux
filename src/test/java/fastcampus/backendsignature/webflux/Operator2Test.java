@@ -28,6 +28,13 @@ class Operator2Test {
     }
 
     @Test
+    void defaultIfEmpty2() {
+        StepVerifier.create(operator.defaultIfEmpty2())
+                .expectNext(99, 99, 7, 7, 8, 7, 8, 9)
+                .verifyComplete();
+    }
+
+    @Test
     void switchIfEmpty() {
         StepVerifier.create(operator.switchIfEmpty())
                 .expectNext(60)

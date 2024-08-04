@@ -1,4 +1,4 @@
-package fastcampus.backendsignature.webflux;
+package fastcampus.backendsignature.webflux.example;
 
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;

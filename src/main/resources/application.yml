@@ -1,3 +1,12 @@
+spring:
+  profiles:
+    active: local
+  config:
+    import: ./env-local.yml
+  r2dbc:
+    url: ${DB-URL}
+    username: ${DB-USERNAME}
+    password: ${DB-PASSWORD}
 logging:
   level:
     root: info

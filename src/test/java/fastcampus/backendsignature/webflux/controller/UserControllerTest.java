@@ -15,7 +15,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(UserController.class)
@@ -83,7 +82,7 @@ class UserControllerTest {
     void deleteUser() {
         when(userService.delete(1L))
                 .thenReturn(
-                        Mono.just(1)
+                        Mono.empty()
                 );
 
         webTestClient.delete().uri("/users/1")

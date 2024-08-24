@@ -1,7 +1,7 @@
 package fastcampus.backendsignature.webflux.service;
 
 import fastcampus.backendsignature.webflux.repository.User;
-import fastcampus.backendsignature.webflux.repository.UserRepository;
+import fastcampus.backendsignature.webflux.repository.UserR2dbcRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -10,7 +10,8 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
+    //    private final UserRepository userRepository;
+    private final UserR2dbcRepository userRepository;
 
     public Mono<User> create(String name, String email) {
         return userRepository.save(User.newUser(name, email));
@@ -33,7 +34,7 @@ public class UserService {
                 });
     }
 
-    public Mono<Integer> delete(Long id) {
+    public Mono<Void> delete(Long id) {
         return userRepository.deleteById(id);
     }
 }

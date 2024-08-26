@@ -40,6 +40,11 @@ public class UserController {
         return userService.delete(id).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @DeleteMapping("")
+    public Mono<ResponseEntity<?>> deleteUsersByName(@RequestParam String name) {
+        return userService.deleteByName(name).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
     @PutMapping("")
     public Mono<ResponseEntity<UserResponse>> updateUser(@RequestBody UserUpdateRequest request) {
         return userService.update(request.getId(), request.getName(), request.getEmail())

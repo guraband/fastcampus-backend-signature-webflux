@@ -25,6 +25,14 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Flux<User> findByName(String name) {
+        return userRepository.findByName(name);
+    }
+
+    public Flux<User> findByNameOrderByIdDesc(String name) {
+        return userRepository.findByNameOrderByIdDesc(name);
+    }
+
     public Mono<User> update(Long id, String name, String email) {
         return userRepository.findById(id)
                 .flatMap(user -> {
@@ -36,5 +44,9 @@ public class UserService {
 
     public Mono<Void> delete(Long id) {
         return userRepository.deleteById(id);
+    }
+
+    public Mono<Void> deleteByName(String name) {
+        return userRepository.deleteByName(name);
     }
 }

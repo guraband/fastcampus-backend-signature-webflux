@@ -35,13 +35,19 @@ public class UserController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
+    @GetMapping("/search")
+    public Flux<UserResponse> findAllUsersByName(@RequestParam("name") String name) {
+        return userService.findByNameOrderByIdDesc(name)
+                .map(UserResponse::of);
+    }
+
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<?>> deleteUser(@PathVariable("id") Long id) {
         return userService.delete(id).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
     @DeleteMapping("")
-    public Mono<ResponseEntity<?>> deleteUsersByName(@RequestParam String name) {
+    public Mono<ResponseEntity<?>> deleteUsersByName(@RequestParam("name") String name) {
         return userService.deleteByName(name).then(Mono.just(ResponseEntity.noContent().build()));
     }
 

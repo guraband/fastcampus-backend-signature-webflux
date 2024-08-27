@@ -7,6 +7,10 @@ spring:
     url: ${DB-URL}
     username: ${DB-USERNAME}
     password: ${DB-PASSWORD}
+  data:
+    redis:
+      host: ${REDIS-HOST}
+      port: ${REDIS-PORT}
 logging:
   level:
     root: info

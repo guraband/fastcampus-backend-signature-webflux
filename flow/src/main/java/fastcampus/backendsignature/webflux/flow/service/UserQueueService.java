@@ -1,5 +1,6 @@
 package fastcampus.backendsignature.webflux.flow.service;
 
+import fastcampus.backendsignature.webflux.flow.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class UserQueueService {
         final var key = USER_QUEUE_KEY_FORMAT.formatted(queue);
         var unitTimeStamp = Instant.now().getEpochSecond();
         return reactiveRedisTemplate.opsForZSet().add(key, member, unitTimeStamp)
+                .filter(i -> i)
+                .switchIfEmpty(Mono.error(ErrorCode.QUEUE_ALREADY_REGISTERED_USER.build()))
                 .flatMap(i -> reactiveRedisTemplate.opsForZSet().rank(key, member))
                 ;
     }

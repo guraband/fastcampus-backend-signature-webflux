@@ -1,2 +1,9 @@
 server:
   port: 9010
+spring:
+  config:
+    import: ./env-local.yml
+  data:
+    redis:
+      host: ${REDIS-HOST}
+      port: ${REDIS-PORT}

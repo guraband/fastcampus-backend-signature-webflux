@@ -26,6 +26,7 @@ public class UserQueueService {
                 .filter(i -> i)
                 .switchIfEmpty(Mono.error(ErrorCode.QUEUE_ALREADY_REGISTERED_USER.build()))
                 .flatMap(i -> reactiveRedisTemplate.opsForZSet().rank(key, member))
+                .map(i -> i >= 0 ? i + 1 : i)
                 ;
     }
 

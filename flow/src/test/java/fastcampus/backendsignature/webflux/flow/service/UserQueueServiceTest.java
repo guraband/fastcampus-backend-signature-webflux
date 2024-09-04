@@ -1,8 +1,7 @@
-package fastcampus.backendsignature.webflux.flow.controller;
+package fastcampus.backendsignature.webflux.flow.service;
 
 import fastcampus.backendsignature.webflux.flow.EmbeddedRedis;
 import fastcampus.backendsignature.webflux.flow.exception.ApplicationException;
-import fastcampus.backendsignature.webflux.flow.service.UserQueueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,7 @@ import reactor.test.StepVerifier;
 @SpringBootTest
 @Import(EmbeddedRedis.class)
 @ActiveProfiles("test")
-class UserQueueControllerTest {
+class UserQueueServiceTest {
     @Autowired
     private UserQueueService userQueueService;
 
@@ -104,6 +103,24 @@ class UserQueueControllerTest {
 
         StepVerifier.create(userQueueService.isAllowed(queueName, 101L))
                 .expectNext(true)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("남은 순서 조회 테스트")
+    void getRank() {
+        var queueName = "default";
+        StepVerifier.create(
+                        userQueueService.registerWaitQueue(queueName, 101L)
+                                .then(userQueueService.registerWaitQueue(queueName, 102L))
+                                .then(userQueueService.registerWaitQueue(queueName, 103L))
+                                .then(userQueueService.getRank(queueName, 102L))
+                )
+                .expectNext(2L)
+                .verifyComplete();
+        StepVerifier.create(userQueueService.getRank(queueName, 200L)
+                )
+                .expectNext(-1L)
                 .verifyComplete();
     }
 }

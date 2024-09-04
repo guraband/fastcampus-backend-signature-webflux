@@ -3,6 +3,7 @@ package fastcampus.backendsignature.webflux.flow.controller;
 import fastcampus.backendsignature.webflux.flow.dto.AllowUserResponse;
 import fastcampus.backendsignature.webflux.flow.dto.AllowedUserResponse;
 import fastcampus.backendsignature.webflux.flow.dto.RegisterUserResponse;
+import fastcampus.backendsignature.webflux.flow.dto.UserRankResponse;
 import fastcampus.backendsignature.webflux.flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,16 @@ public class UserQueueController {
             @RequestParam(name = "user_id") Long userId
     ) {
         return userQueueService.isAllowed(queue, userId)
-                .map(AllowedUserResponse::new
-                );
+                .map(AllowedUserResponse::new);
+    }
+
+    // 대기번호 조회
+    @GetMapping("/rank")
+    public Mono<UserRankResponse> getRank(
+            @RequestParam(name = "queue", defaultValue = "default") String queue,
+            @RequestParam(name = "user_id") Long userId
+    ) {
+        return userQueueService.getRank(queue, userId)
+                .map(UserRankResponse::new);
     }
 }

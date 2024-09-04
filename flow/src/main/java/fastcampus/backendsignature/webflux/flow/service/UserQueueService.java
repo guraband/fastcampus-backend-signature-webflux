@@ -48,4 +48,11 @@ public class UserQueueService {
                 .defaultIfEmpty(-1L)
                 .map(i -> i >= 0);
     }
+
+    public Mono<Long> getRank(final String queue, final Long userId) {
+        final var waitKey = USER_WAIT_KEY_FORMAT.formatted(queue);
+        return reactiveRedisTemplate.opsForZSet().rank(waitKey, userId.toString())
+                .defaultIfEmpty(-1L)
+                .map(rank -> rank > -1 ? rank + 1 : rank);
+    }
 }

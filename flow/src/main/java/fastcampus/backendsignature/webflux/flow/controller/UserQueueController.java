@@ -7,13 +7,27 @@ import fastcampus.backendsignature.webflux.flow.dto.UserRankResponse;
 import fastcampus.backendsignature.webflux.flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/queue")
 public class UserQueueController {
     private final UserQueueService userQueueService;
+
+    @PostMapping("/test-data")
+    public Mono<RegisterUserResponse> generateTestData(
+            @RequestParam(name = "queue", defaultValue = "default") String queue,
+            @RequestParam(name = "count") Long count
+    ) {
+        return Flux.range(1, count.intValue())
+                .flatMap(i -> userQueueService.registerWaitQueue(queue, (long) i))
+                .subscribeOn(Schedulers.boundedElastic())
+                .reduce(0L, Long::sum)
+                .map(RegisterUserResponse::new);
+    }
 
     @PostMapping("")
     public Mono<RegisterUserResponse> registerUser(

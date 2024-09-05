@@ -7,3 +7,7 @@ spring:
     redis:
       host: ${REDIS-HOST}
       port: ${REDIS-PORT}
+logging:
+  level:
+    root: info
+

@@ -2,23 +2,31 @@ package fastcampus.backendsignature.webflux.flow.service;
 
 import fastcampus.backendsignature.webflux.flow.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.Objects;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserQueueService {
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
 
     private final String USER_WAIT_KEY_FORMAT = "user:queue:%s:wait";
+    private final String USER_WAIT_KEY_FOR_SCAN_FORMAT = "user:queue:*:wait";
     private final String USER_PROCEED_KEY_FORMAT = "user:queue:%s:proceed";
 
     public Mono<Long> registerWaitQueue(
             final String queue, final Long userId) {
+
+        log.info("# queue : {}, userId : {}", queue, userId);
+
         var member = userId.toString();
         final var key = USER_WAIT_KEY_FORMAT.formatted(queue);
         var unitTimeStamp = Instant.now().getEpochSecond();
@@ -39,6 +47,18 @@ public class UserQueueService {
                 .flatMap(u -> reactiveRedisTemplate.opsForZSet().add(proceedKey, Objects.requireNonNull(u.getValue()), unixTimeStamp))
                 .count()
                 ;
+    }
+
+    public void scheduleAllowUser() {
+        var maxAllowUserCount = 3L;
+        reactiveRedisTemplate.scan(ScanOptions.scanOptions()
+                        .match(USER_WAIT_KEY_FOR_SCAN_FORMAT)
+                        .count(100)
+                        .build())
+                .map(key -> key.split(":")[2])
+                .flatMap(queue -> allowUser(queue, maxAllowUserCount).map(allowed -> Tuples.of(queue, allowed)))
+                .doOnNext(tuple -> log.info("[{}] 허용 요청 수 : {}, 허용 수 : {}", tuple.getT1(), maxAllowUserCount, tuple.getT2()))
+                .subscribe();
     }
 
     // 진입 가능한 상태인지 조회

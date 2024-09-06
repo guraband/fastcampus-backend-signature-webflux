@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -21,6 +24,8 @@ public class UserQueueService {
     private final String USER_WAIT_KEY_FORMAT = "user:queue:%s:wait";
     private final String USER_WAIT_KEY_FOR_SCAN_FORMAT = "user:queue:*:wait";
     private final String USER_PROCEED_KEY_FORMAT = "user:queue:%s:proceed";
+
+    private final String ALLOWED_USER_TOKEN_FORMAT = "user-queue-%s-%d";
 
     public Mono<Long> registerWaitQueue(
             final String queue, final Long userId) {
@@ -67,6 +72,34 @@ public class UserQueueService {
         return reactiveRedisTemplate.opsForZSet().rank(proceedKey, userId.toString())
                 .defaultIfEmpty(-1L)
                 .map(i -> i >= 0);
+    }
+
+    public Mono<Boolean> isAllowedByToken(final String queue,
+                                          final Long userId,
+                                          final String token
+    ) {
+        return this.generateToken(queue, userId)
+                .filter(compareToken -> compareToken.equals(token))
+                .map(i -> true)
+                .defaultIfEmpty(false);
+    }
+
+    // 진입 가능해진 사용자에게 토큰 발급
+    public Mono<String> generateToken(final String queue, final Long userId) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+            var input = ALLOWED_USER_TOKEN_FORMAT.formatted(queue, userId);
+            var encodedHash = md.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encodedHash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return Mono.just(hexString.toString());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Mono<Long> getRank(final String queue, final Long userId) {

@@ -123,4 +123,18 @@ class UserQueueServiceTest {
                 .expectNext(-1L)
                 .verifyComplete();
     }
+
+    @Test
+    void generateToken() {
+        StepVerifier.create(userQueueService.generateToken("default", 101L))
+                .expectNext("bf00fd9ec300129861628c5a13e9507bb8b3dc6603f3bc8dd978b709c1146dff")
+                .verifyComplete();
+    }
+
+    @Test
+    void isAllowedByToken() {
+        StepVerifier.create(userQueueService.isAllowedByToken("default", 101L, "bf00fd9ec300129861628c5a13e9507bb8b3dc6603f3bc8dd978b709c1146dff"))
+                .expectNext(true)
+                .verifyComplete();
+    }
 }

@@ -6,16 +6,22 @@ import fastcampus.backendsignature.webflux.flow.dto.RegisterUserResponse;
 import fastcampus.backendsignature.webflux.flow.dto.UserRankResponse;
 import fastcampus.backendsignature.webflux.flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/queue")
 public class UserQueueController {
     private final UserQueueService userQueueService;
+
+    public static final String TOKEN_COOKIE_KEY_FORMAT = "user-queue-%s-token";
 
     @PostMapping("/test-data")
     public Mono<RegisterUserResponse> generateTestData(
@@ -65,5 +71,23 @@ public class UserQueueController {
     ) {
         return userQueueService.getRank(queue, userId)
                 .map(UserRankResponse::new);
+    }
+
+    @GetMapping("/touch")
+    Mono<?> touch(
+            @RequestParam(name = "queue", defaultValue = "default") String queue,
+            @RequestParam(name = "user_id") Long userId,
+            ServerWebExchange exchange
+    ) {
+        return Mono.defer(() -> userQueueService.generateToken(queue, userId))
+                .map(token -> {
+                    exchange.getResponse().addCookie(
+                            ResponseCookie.from(TOKEN_COOKIE_KEY_FORMAT.formatted(queue), token)
+                                    .maxAge(Duration.ofMinutes(1))
+                                    .path("/")
+                                    .build()
+                    );
+                    return token;
+                });
     }
 }
